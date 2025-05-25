@@ -9,10 +9,15 @@ import soat.project.fastfoodsoat.domain.order.OrderGateway;
 import soat.project.fastfoodsoat.domain.order.OrderPublicId;
 import soat.project.fastfoodsoat.domain.order.OrderStatus;
 import soat.project.fastfoodsoat.domain.order.orderproduct.OrderProduct;
+import soat.project.fastfoodsoat.domain.payment.Payment;
+import soat.project.fastfoodsoat.domain.payment.PaymentGateway;
+import soat.project.fastfoodsoat.domain.payment.PaymentService;
+import soat.project.fastfoodsoat.domain.payment.PaymentStatus;
 import soat.project.fastfoodsoat.domain.product.Product;
 import soat.project.fastfoodsoat.domain.product.ProductGateway;
 import soat.project.fastfoodsoat.domain.product.ProductId;
 import soat.project.fastfoodsoat.domain.validation.handler.Notification;
+import soat.project.fastfoodsoat.utils.QRCodeGeneratorUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,11 +32,17 @@ public class DefaultCreateOrderUseCase extends CreateOrderUseCase {
 
     private final OrderGateway orderGateway;
     private final ProductGateway productGateway;
+    private final PaymentGateway paymentGateway;
+    private final PaymentService paymentService;
 
     public DefaultCreateOrderUseCase(final OrderGateway orderGateway,
-                                     final ProductGateway productGateway) {
+                                     final ProductGateway productGateway,
+                                     final PaymentGateway paymentGateway,
+                                     final PaymentService paymentService) {
         this.orderGateway = requireNonNull(orderGateway);
         this.productGateway = requireNonNull(productGateway);
+        this.paymentGateway = paymentGateway;
+        this.paymentService = paymentService;
     }
 
     @Override
@@ -74,6 +85,7 @@ public class DefaultCreateOrderUseCase extends CreateOrderUseCase {
         final BigDecimal value = Order.calculateValue(orderProductDomains);
         final Integer orderNumber = orderGateway.findLastOrderNumber() + 1;
         final UUID publicId = UUID.randomUUID();
+        final UUID externalReference = UUID.randomUUID();
 
         final Order order = notification.validate(() ->
                 Order.newOrder(
@@ -81,7 +93,8 @@ public class DefaultCreateOrderUseCase extends CreateOrderUseCase {
                         orderNumber,
                         OrderStatus.RECEIVED,
                         value,
-                        orderProductDomains
+                        orderProductDomains,
+                        null
                 )
         );
 
@@ -91,6 +104,36 @@ public class DefaultCreateOrderUseCase extends CreateOrderUseCase {
 
         final Order createdOrder = orderGateway.create(order);
 
-        return CreateOrderOutput.from(createdOrder);
+        final String qrCodeText = paymentService.createDynamicQrCode(
+                orderNumber,
+                externalReference,
+                value,
+                createdOrder.getOrderProducts()
+        );
+
+        if (qrCodeText == null) {
+            throw new NotificationException("could not create qr code", notification);
+        }
+
+        final Payment payment = notification.validate(() ->
+                Payment.newPayment(
+                        value,
+                        externalReference.toString(),
+                        qrCodeText,
+                        PaymentStatus.PENDING,
+                        createdOrder
+                )
+        );
+
+        if (notification.hasError()) {
+            throw new NotificationException("could not create payment", notification);
+        }
+
+        final Payment createdPayment = paymentGateway.create(payment);
+
+        return CreateOrderOutput.from(
+                createdOrder,
+                createdPayment
+        );
     }
 }

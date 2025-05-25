@@ -2,13 +2,12 @@ package soat.project.fastfoodsoat.adapter.outbound.jpa.mapper;
 
 import soat.project.fastfoodsoat.adapter.outbound.jpa.entity.OrderJpaEntity;
 import soat.project.fastfoodsoat.adapter.outbound.jpa.entity.OrderProductJpaEntity;
+import soat.project.fastfoodsoat.adapter.outbound.jpa.entity.PaymentJpaEntity;
 import soat.project.fastfoodsoat.adapter.outbound.jpa.entity.ProductJpaEntity;
 import soat.project.fastfoodsoat.domain.order.Order;
 import soat.project.fastfoodsoat.domain.order.OrderId;
 import soat.project.fastfoodsoat.domain.order.OrderPublicId;
 import soat.project.fastfoodsoat.domain.order.OrderStatus;
-import soat.project.fastfoodsoat.domain.order.orderproduct.OrderProduct;
-import soat.project.fastfoodsoat.domain.order.orderproduct.OrderProductId;
 
 import java.util.List;
 import java.util.Map;
@@ -27,10 +26,29 @@ public final class OrderJpaMapper {
                 orderJpa.getValue(),
                 orderJpa.getOrderNumber(),
                 OrderStatus.valueOf(orderJpa.getStatus()),
-                orderJpa.getOrderProducts().stream()
+                orderJpa.getOrderProducts() != null ?orderJpa.getOrderProducts().stream()
                         .filter(Objects::nonNull)
                         .map(OrderProductJpaMapper::fromJpa)
-                        .toList(),
+                        .toList() : null,
+                orderJpa.getPayment() != null ? PaymentJpaMapper.fromJpa(orderJpa.getPayment()) : null,
+                orderJpa.getCreatedAt(),
+                orderJpa.getUpdatedAt(),
+                orderJpa.getDeletedAt()
+        );
+    }
+
+    public static Order fromJpaWithoutPayment(final OrderJpaEntity orderJpa) {
+        return Order.with(
+                OrderId.of(orderJpa.getId()),
+                OrderPublicId.of(orderJpa.getPublicId()),
+                orderJpa.getValue(),
+                orderJpa.getOrderNumber(),
+                OrderStatus.valueOf(orderJpa.getStatus()),
+                orderJpa.getOrderProducts() != null ?orderJpa.getOrderProducts().stream()
+                        .filter(Objects::nonNull)
+                        .map(OrderProductJpaMapper::fromJpa)
+                        .toList() : null,
+                null,
                 orderJpa.getCreatedAt(),
                 orderJpa.getUpdatedAt(),
                 orderJpa.getDeletedAt()
@@ -47,6 +65,7 @@ public final class OrderJpaMapper {
                 order.getOrderNumber(),
                 order.getStatus().toString(),
                 null,
+                null,
                 order.getCreatedAt(),
                 order.getUpdatedAt(),
                 order.getDeletedAt()
@@ -62,6 +81,7 @@ public final class OrderJpaMapper {
                 order.getValue(),
                 order.getOrderNumber(),
                 order.getStatus().toString(),
+                null,
                 null,
                 order.getCreatedAt(),
                 order.getUpdatedAt(),

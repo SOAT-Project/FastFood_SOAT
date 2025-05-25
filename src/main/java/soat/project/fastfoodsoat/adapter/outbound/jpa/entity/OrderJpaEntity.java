@@ -31,8 +31,11 @@ public class OrderJpaEntity {
     @ColumnTransformer(write="?::order_status")
     private String status;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private List<OrderProductJpaEntity> orderProducts;
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    private PaymentJpaEntity payment;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
@@ -47,13 +50,14 @@ public class OrderJpaEntity {
 
     public OrderJpaEntity() {}
 
-    public OrderJpaEntity(Integer id, UUID publicId, BigDecimal value, Integer orderNumber, String status, List<OrderProductJpaEntity> orderProducts,Instant createdAt, Instant updatedAt, Instant deletedAt) {
+    public OrderJpaEntity(Integer id, UUID publicId, BigDecimal value, Integer orderNumber, String status, List<OrderProductJpaEntity> orderProducts, PaymentJpaEntity payment, Instant createdAt, Instant updatedAt, Instant deletedAt) {
         this.id = id;
         this.publicId = publicId;
         this.value = value;
         this.orderNumber = orderNumber;
         this.status = status;
         this.orderProducts = orderProducts;
+        this.payment = payment;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.deletedAt = deletedAt;
@@ -131,5 +135,15 @@ public class OrderJpaEntity {
         if (orderProducts == null) return;
 
         this.orderProducts = orderProducts;
+    }
+
+    public PaymentJpaEntity getPayment() {
+        return payment;
+    }
+
+    public void setPayment(PaymentJpaEntity paymentJpa) {
+        if (paymentJpa == null) return;
+
+        this.payment = paymentJpa;
     }
 }

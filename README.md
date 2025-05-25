@@ -27,6 +27,9 @@ DATABASE_NAME=postgres
 DATABASE_USER=postgres
 DATABASE_PASS=P@ssw0rd
 AUTH_TOKEN_EXPIRATION=43200
+MP_TOKEN=APP_USR-2512049377508546-052123-386869c4214628b0e44f44f638bc2ebe-2448858150
+COLLECTOR_ID=2448858150
+POS_ID=SUC001POS001
 ```
 
 #### Opção 2: Usando variáveis de ambiente do sistema
@@ -41,6 +44,9 @@ export DATABASE_NAME=postgres
 export DATABASE_USER=postgres
 export DATABASE_PASS=P@ssw0rd
 export AUTH_TOKEN_EXPIRATION=43200
+export MP_TOKEN=APP_USR-2512049377508546-052123-386869c4214628b0e44f44f638bc2ebe-2448858150
+export COLLECTOR_ID=2448858150
+export POS_ID=SUC001POS001
 ```
 - Windows (PowerShell):
 ```PowerShell
@@ -51,6 +57,9 @@ $env:DATABASE_NAME="postgres"
 $env:DATABASE_USER="postgres"
 $env:DATABASE_PASS="P@ssw0rd"
 $env:AUTH_TOKEN_EXPIRATION="43200"
+$env:MP_TOKEN="APP_USR-2512049377508546-052123-386869c4214628b0e44f44f638bc2ebe-2448858150"
+$env:COLLECTOR_ID="2448858150"
+$env:POS_ID="SUC001POS001"
 ```
 
 Se nenhuma das opções acima for configurada, o Docker Compose utilizará os valores padrão definidos no arquivo `docker-compose.yaml`.
@@ -115,6 +124,9 @@ Você pode configurar as seguintes variáveis de ambiente:
 - `DATABASE_NAME`: Nome do banco de dados (padrão: postgres)
 - `APPLICATION_PORT`: Porta da aplicação (padrão: 8080, também usada como build-arg)
 - `AUTH_TOKEN_EXPIRATION`: Tempo de expiração do token de autenticação em segundos (padrão: 43200)
+- `MP_TOKEN`: Token de autenticação para o MP (padrão: APP_USR-2512049377508546-052123-386869c4214628b0e44f44f638bc2ebe-2448858150)
+- `COLLECTOR_ID`: ID do coletor MP (padrão: 2448858150)
+- `POS_ID`: ID do POS MP (padrão: SUC001POS001)
 
 ### Testes
 

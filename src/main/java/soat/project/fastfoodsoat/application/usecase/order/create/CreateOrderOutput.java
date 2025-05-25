@@ -1,6 +1,7 @@
 package soat.project.fastfoodsoat.application.usecase.order.create;
 
 import soat.project.fastfoodsoat.domain.order.Order;
+import soat.project.fastfoodsoat.domain.payment.Payment;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -8,39 +9,37 @@ import java.util.UUID;
 
 public record CreateOrderOutput(
         UUID publicId,
-        BigDecimal value,
         Integer orderNumber,
         String status,
-        List<CreateOrderProductOutput> orderProducts,
-        String createdAt,
-        String updatedAt,
-        String deletedAt
+        BigDecimal value,
+        CreateOrderPaymentOutput payment,
+        List<CreateOrderProductOutput> orderProducts
 ) {
     public static CreateOrderOutput from(
             final UUID publicId,
-            final BigDecimal value,
             final Integer orderNumber,
             final String status,
-            final List<CreateOrderProductOutput> orderProducts,
-            final String createdAt,
-            final String updatedAt,
-            final String deletedAt
+            final BigDecimal value,
+            final CreateOrderPaymentOutput payment,
+            final List<CreateOrderProductOutput> orderProducts
     ) {
-        return new CreateOrderOutput(publicId, value, orderNumber, status, orderProducts, createdAt, updatedAt, deletedAt);
+        return new CreateOrderOutput(publicId, orderNumber, status, value, payment, orderProducts);
     }
 
-    public static CreateOrderOutput from(final Order order) {
+    public static CreateOrderOutput from(final Order order, final Payment payment) {
         return new CreateOrderOutput(
                 order.getPublicId().getValue(),
-                order.getValue(),
                 order.getOrderNumber(),
                 order.getStatus().toString(),
+                order.getValue(),
+                CreateOrderPaymentOutput.from(
+                        payment.getStatus().toString(),
+                        payment.getExternalReference(),
+                        payment.getQrCode()
+                ),
                 order.getOrderProducts().stream()
                         .map(CreateOrderProductOutput::from)
-                        .toList(),
-                order.getCreatedAt().toString(),
-                order.getUpdatedAt().toString(),
-                order.getDeletedAt() != null ? order.getDeletedAt().toString() : null
+                        .toList()
         );
     }
 }
