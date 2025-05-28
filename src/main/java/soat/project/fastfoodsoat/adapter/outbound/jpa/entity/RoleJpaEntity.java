@@ -21,7 +21,7 @@ public class RoleJpaEntity {
     private Instant createdAt;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "update_at")
+    @Column(name = "updated_at")
     private Instant updateAt;
     @Column(name = "deleted_at")
     private Instant deletedAt;
